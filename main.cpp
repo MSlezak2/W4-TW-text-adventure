@@ -21,6 +21,7 @@ scene scenes[2][4];
 
 int main() {
 
+	std::cout << "Czolem kluski z rosolem" << std::endl;
 	player player_1; // zmienna reprezentujaca gracza
 	player_1.current_scene_x = 0;
 	player_1.current_scene_y = 0;
@@ -64,7 +65,7 @@ int main() {
 
 		}
 
-	} while (true);
+	} while (false);
 
 	return 0;
 }
