@@ -14,6 +14,7 @@ struct scene {
 struct player {
 	int current_scene_x;
 	int current_scene_y;
+	std::string name;
 };
 	
 
