@@ -1,5 +1,6 @@
 #include <string>
 #include <iostream>
+#include <algorithm>
 #include <vector>
 
 const int final_scene_x = 2;
@@ -19,7 +20,7 @@ struct scene {
 	std::string description;
 	std::string possible_directions[4];
 	std::string name;
-	// ... 
+	std::string help; 
 };
 
 struct player {
@@ -29,8 +30,9 @@ struct player {
 	std::string name1;
 
 };
-
-std::vector<item> inventory;
+	
+std::string isHelpNeeded(std::string help);
+void actualSceneHelp(int& current_scene_x, int& current_scene_y, scene scenes[2][4]);
 
 char isValidDirect(std::string input);
 void goSomwhere(std::string direction);
@@ -44,10 +46,14 @@ void display_final_message();
 
 int main() {
 
-	std::cout << "Czolem kluski z rosolem" << std::endl;
 	player player_1; // zmienna reprezentujaca gracza
 	player_1.current_scene_x = 0;
 	player_1.current_scene_y = 0;
+
+
+	std::string help;
+	scenes[0][0].help = "HELPPPPPP";
+
 
 	int state = 0; // obecny stan (patrz: schemat stanów)
 	std::string userInput;
@@ -85,15 +91,33 @@ int main() {
 			state = 0;
 			break;
 
-		}
+		case 2: // np. stan SOUTH
 
+			bool has_player_won = false;
+
+			if (player.current_scene_x == final_scene_x && player.current_scene_y == final_scene_y)
+			{
+				has_player_won = true;
+				display_final_message();
+			}
+
+
+		case 3: //help 
+
+			std::string help;
+
+			//isHelpNeeded(help);
+			actualSceneHelp(player_1.current_scene_x, player_1.current_scene_y, scenes);
+			state = 0;
+
+			break;
+		}
 	} while (!has_player_won(player_1));
 
 	return 0;
-
-
-	return 0;
 }
+
+
 
 bool is_game_over() {
 
@@ -112,6 +136,7 @@ bool has_player_won(player player) {
 
 	return has_player_won;
 }
+	
 
 void display_final_message() {
 
@@ -155,4 +180,29 @@ void move(int& current_scene_x, int& current_scene_y, char direction) {
 	if (direction == 'W') {
 		current_scene_x--;
 	}
+}
+
+
+std::string isHelpNeeded(std::string help)
+
+{
+	do
+	{
+		help.clear();
+		std::cout << "Type HELP or H to get help\n";
+		(std::cin >> help).get();
+		std::transform(help.begin(), help.end(), help.begin(), toupper);
+		std::cout << " ";
+
+	} while (help != "HELP" && help != "H");
+
+	return help;
+}
+
+void actualSceneHelp(int& current_scene_x, int& current_scene_y, scene scenes[2][4])
+{
+	std::string actualHelp;
+	actualHelp = scenes[current_scene_x][current_scene_y].help;
+	std::cout << actualHelp;
+	
 }
