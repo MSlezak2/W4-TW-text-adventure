@@ -1,10 +1,25 @@
 #include <iostream>
 #include <cstring>
 #include <cctype>
+#include <fstream>
 
 
-std::string isValidDirect(std::string input);
-void goSomwhere(std::string direction);
+// 
+struct scene {
+	std::string description;
+	std::string possible_directions[4];
+	// ... 
+};
+
+struct player {
+	int current_scene_x;
+	int current_scene_y;
+	std::string name;
+};
+
+
+std::string is_valid_direct(std::string input);
+void go_somwhere(std::string direction);
 
 int main() {
 
@@ -12,8 +27,18 @@ int main() {
 
 	std::cout << "Where you want to go (N)ORTH, (S)OUTH, (E)AST, (W)EST? " << std::endl;
 	std::cin >> userInput;
-	goSomwhere(userInput);
+	go_somwhere(userInput);
 
+
+	std::fstream newFile;
+	newFile.open("game_save.dat", std::ios::out | std::ios::binary);
+
+	if (newFile.is_open()) {
+		newFile.write(reinterpret_cast<char*>(&kitchen), sizeof(scene));
+		newFile.close();
+	}
+	else
+		std::cout << "ERROR!" << std::endl;
 
 	return 0;
 }
@@ -29,7 +54,7 @@ int main() {
 *
 * @return string with correct  direction or X when input is invalid
 */
-std::string isValidDirect(std::string input) {
+std::string is_valid_direct(std::string input) {
 
 	std::string output;
 
@@ -49,11 +74,10 @@ std::string isValidDirect(std::string input) {
 * function work until user enter valid direction
 *
 */
-void goSomwhere(std::string direction) {
-	while (isValidDirect(direction) == "X") {
+void go_somwhere(std::string direction) {
+	while (is_valid_direct(direction) == "X") {
 		std::cout << "You choose wrong direction.Try again" << std::endl;
 		std::cin >> direction;
-		isValidDirect(direction);
 	}
 	std::cout << "Good move." << std::endl;
 }
