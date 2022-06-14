@@ -1,5 +1,6 @@
 #include <string>
 #include <iostream>
+#include <vector>
 
 const int final_scene_x = 2;
 const int final_scene_y = 3;
@@ -7,6 +8,12 @@ const int final_scene_y = 3;
 // osobne funkcje do poszczegolnych czynnosci (podnies, uzyj, idz(kierunek), ...)
 // HELP ZALEzNY OD OBECNEJ LOkalizacji (np. opis przedmiotow ktore sie tam znajduja)
 // warunek zwyciestwa uzaleznic od roznych rzeczy (meta, zebrane przedmioty itd)
+// przedmiot jako osobna struktura (imie, wage)
+
+struct item {
+	std::string name;
+	float weight;
+};
 
 struct scene {
 	std::string description;
@@ -20,6 +27,8 @@ struct player {
 	int current_scene_y;
 	std::string name;
 };
+
+std::vector<item> inventory;
 
 char isValidDirect(std::string input);
 void goSomwhere(std::string direction);
@@ -93,7 +102,7 @@ bool has_player_won(player player) {
 
 	bool has_player_won = false;
 
-	if (player.current_scene_x == final_scene_x && player.current_scene_y == final_scene_y])
+	if (player.current_scene_x == final_scene_x && player.current_scene_y == final_scene_y)
 	{
 		has_player_won = true;
 		display_final_message();
@@ -108,6 +117,7 @@ void display_final_message() {
 
 	std::cout << "Congratulation! You've made it after all!";
 }
+/*
  @return string with correct  direction or X when input is invalid
 */
 char isValidDirect(std::string input) {
