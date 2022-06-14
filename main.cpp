@@ -1,6 +1,9 @@
 #include <string>
 #include <iostream>
 
+const int final_scene_x = 2;
+const int final_scene_y = 3;
+
 // osobne funkcje do poszczegolnych czynnosci (podnies, uzyj, idz(kierunek), ...)
 // HELP ZALEzNY OD OBECNEJ LOkalizacji (np. opis przedmiotow ktore sie tam znajduja)
 // warunek zwyciestwa uzaleznic od roznych rzeczy (meta, zebrane przedmioty itd)
@@ -8,6 +11,7 @@
 struct scene {
 	std::string description;
 	std::string possible_directions[4];
+	std::string name;
 	// ... 
 };
 
@@ -21,7 +25,11 @@ char isValidDirect(std::string input);
 void goSomwhere(std::string direction);
 void move(int& current_scene_x, int& current_scene_y, char direction);
 
-scene scenes[2][4];
+scene scenes[3][4];
+
+bool is_game_over();
+bool has_player_won(player player);
+void display_final_message();
 
 int main() {
 
@@ -68,20 +76,38 @@ int main() {
 
 		}
 
-	} while (true);
+	} while (!has_player_won(player_1));
+
+	return 0;
+
 
 	return 0;
 }
 
+bool is_game_over() {
 
-/*
-	check is input valid
-	//------- Possible move:
-	//	 North	(N)
-	//	 South	(S)
-	//	 East	(E)
-	//	 West	(W)
+	return false;
+}
 
+bool has_player_won(player player) {
+
+	bool has_player_won = false;
+
+	if (player.current_scene_x == final_scene_x && player.current_scene_y == final_scene_y])
+	{
+		has_player_won = true;
+		display_final_message();
+	}
+
+	return has_player_won;
+}
+
+void display_final_message() {
+
+	system("cls");
+
+	std::cout << "Congratulation! You've made it after all!";
+}
  @return string with correct  direction or X when input is invalid
 */
 char isValidDirect(std::string input) {
