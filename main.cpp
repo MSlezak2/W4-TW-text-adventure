@@ -199,7 +199,7 @@ std::string isHelpNeeded(std::string help)
 	return help;
 }
 
-void actualSceneHelp(int& current_scene_x, int& current_scene_y, scene scenes[2][4])
+void actualSceneHelp(int current_scene_x, int current_scene_y, scene scenes[2][4])
 {
 	std::string actualHelp;
 	actualHelp = scenes[current_scene_x][current_scene_y].help;
