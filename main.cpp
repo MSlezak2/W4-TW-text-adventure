@@ -2,12 +2,14 @@
 #include <iostream>
 #include <vector>
 #include <cstdint>
+#include <conio.h>
+#include <algorithm>
 
 const int WORLD_SIZE_X = 4;
 const int WORLD_SIZE_Y = 3;
 
-const int FINAL_SIZE_X = 2;
-const int FINAL_SIZE_Y = 3;
+const int FINAL_SCENE_X = 2;
+const int FINAL_SCENE_Y = 3;
 
 // osobne funkcje do poszczegolnych czynnosci (podnies, uzyj, idz(kierunek), ...)
 // HELP ZALEzNY OD OBECNEJ LOkalizacji (np. opis przedmiotow ktore sie tam znajduja)
@@ -24,6 +26,7 @@ struct scene {
 	std::string description;
 	std::string possible_directions[4];
 	std::string name;
+	std::string help;
 	std::vector<item> items; // jakie przedmioty znajduja sie w danej scenie (pokoju)
 };
 
@@ -33,18 +36,30 @@ struct player {
 	std::string name;
 	std::vector<item> inventory; // ekwipunek gracza
 };
-
+	
 char isValidDirect(std::string input);
-void goSomwhere(std::string direction);
+void goSomwhere(std::string &direction);
 void move(int& current_scene_x, int& current_scene_y, char direction);
 
 bool is_game_over();
 bool has_player_won(player player);
 void display_final_message();
+
+int users_options(scene scene);
 void display_items_in_the_scene(scene scene);
+void display_items_in_the_inventory(player player);
 //void pickAnItem(player player, );
 
+void state_movement(player &player);
+void state_pick(scene &scene, player &player);
+void state_inventory(scene &scene, player &player);
+
+std::string isHelpNeeded(std::string help);
+void actualSceneHelp(int& current_scene_x, int& current_scene_y, scene scenes[WORLD_SIZE_Y][WORLD_SIZE_X]);
+
 int main() {
+
+
 
 	// Dane programu:
 	scene scenes[WORLD_SIZE_Y][WORLD_SIZE_X]; // tablica scen (pokoi) reprezentujaca swiat gry
@@ -52,15 +67,15 @@ int main() {
 
 	player_1.current_scene_x = 0;
 	player_1.current_scene_y = 0;
-	scenes[0][0].items = { {"miecz", "",1}, {"tarcza", "", 2}};
+	scenes[0][0].items = { {"miecz", "",1}, {"tarcza", "", 2} };
+	scenes[0][0].help = "help";
 	scenes[0][0].description = { "Hello stranger! Are you lost?\n"
 							"You just happen to find yourself in a magical labyrinth.\n"
 							"Unfortunately, there is only one way to escape. Be careful!\n\n" };
 
 	int state = 0; // obecny stan (patrz: schemat stanów)
 
-	char direction;
-	std::string userInput;
+	int usersChoice;
 
 	do
 	{
@@ -69,58 +84,169 @@ int main() {
 		case 0: // stan SCENE
 			// wyswietl opis sceny (na podstawie wspolrzednych)
 			system("cls");
-			std::cout << scenes[player_1.current_scene_x][player_1.current_scene_y].description;
-			display_items_in_the_scene(scenes[player_1.current_scene_x][player_1.current_scene_y]);
+			std::cout << scenes[player_1.current_scene_y][player_1.current_scene_x].description;
+			display_items_in_the_scene(scenes[player_1.current_scene_y][player_1.current_scene_x]);
 
 			//test:
 			std::cout << "\ncurrent_scene_x: " << player_1.current_scene_x << "\tcurrent_scene_y: " << player_1.current_scene_y << std::endl;
 			// koniec testu
-			
-			// wystwietl dostepne opcje
-			std::cout << "\nWhere you want to go (N)ORTH, (S)OUTH, (E)AST, (W)EST? " << std::endl;
 
 			// zczytaj opcje wybrana przez uzytkownika (walidacja)
 			// TODO: Kazdy ma zrobic funkcje walidujaca jego opcje (np. Marcin kierunki, Iza helpa, ja podnies / odloz)
 			// ktora zwraca true / false. Sprawdzamy pozniej czy ktorakolwiek zwrocila true, jesli nie to wyswietlamy komunikat
 			// (taki ogolny) i zczytujemy dalej
-			std::cin >> userInput;
-			goSomwhere(userInput);
-
-			direction = isValidDirect(userInput);
 
 			// zmien stan w zaleznosci od wybranej przez uzytkownika opcji
-			state = 1;
+			state = users_options(scenes[player_1.current_scene_y][player_1.current_scene_x]);
 
 			break;
 
 		case 1: // state MOVEMENT
 
-			// zmien wspolzedne 
-			move(player_1.current_scene_x, player_1.current_scene_y, direction);
+			state_movement(player_1);
 
+			// wroc do stanu SCENE
+			state = 0;
+			break;
+
+		case 2: // state INVENTORY
+
+			state_inventory(scenes[player_1.current_scene_y][player_1.current_scene_y], player_1);
 			// wroc do stanu SCENE
 			state = 0;
 			break;
 
 		case 3: // state PICK
+		{
 
-			// wyswietl dostepne przedmioty
-			
-			// zapytaj gracza ktory chce podniesc
-
-			// odczytaj odpowiedz (walidacja)
-
-			// jesli nie przekroczymy wagi to przenies do ekwipunku i usun z pokoju (Iza sprawdza ta wage)
+			state_pick(scenes[player_1.current_scene_y][player_1.current_scene_x], player_1);
 
 			// wroc do stanu SCENE
 			state = 0;
 			break;
+		}
+		
+		case 4: // state HELP
 
+			std::string help;
+
+			//isHelpNeeded(help);
+			system("cls");
+			actualSceneHelp(player_1.current_scene_x, player_1.current_scene_y, scenes);
+			_getch();
+
+			// wroc do stanu SCENE
+			state = 0;
+			break;
 		}
 
-	} while (!has_player_won(player_1));
+	} while (!has_player_won(player_1) && state != -1);
+
+	if (state = -1)
+	{
+		system("cls");
+		std::cout << "\nUfff... It was just a dream after all\n";
+	}
 
 	return 0;
+}
+
+void state_movement(player &player) {
+
+	char direction;
+	std::string userInput;
+
+	system("cls");
+	std::cout << "\nWhere you want to go (N)ORTH, (S)OUTH, (E)AST, (W)EST? " << std::endl;
+
+	std::cin >> userInput;
+	goSomwhere(userInput);
+	direction = isValidDirect(userInput);
+
+	// zmien wspolzedne 
+	move(player.current_scene_x, player.current_scene_y, direction);
+}
+
+void state_pick(scene &scene, player &player) {
+
+	int usersChoice = 0;
+	std::string userInput;
+
+	// wyswietl dostepne przedmioty
+	system("cls");
+	display_items_in_the_scene(scene);
+
+	// zapytaj gracza ktory chce podniesc
+	std::cout << "\nWhich one do you choose?" << std::endl;
+	// odczytaj odpowiedz (walidacja)
+	
+	while (usersChoice == 0) {
+		std::cin >> userInput;
+		try {
+			usersChoice = stoi(userInput);
+		}
+		catch (const std::exception&) {
+			std::cout << "Make sure you enter a number from a given range\n";
+		}
+	}
+
+	// jesli nie przekroczymy wagi to przenies do ekwipunku i usun z pokoju (Iza sprawdza ta wage)
+	player.inventory.push_back(scene.items[usersChoice - 1]);
+	std::vector<item>::iterator iterator = scene.items.begin();
+	scene.items.erase(iterator + usersChoice - 1);
+}
+
+void state_inventory(scene& scene, player& player) {
+	
+	char usersChoiceChar = 0;
+	int usersChoiceInt = -1;
+	std::string userInput;
+
+	// display the content of the inventory
+	system("cls");
+	display_items_in_the_inventory(player);
+	
+	// ask user if he wants to drop something or just come back
+	if (player.inventory.size() > 0) {
+		std::cout << "\nTo drop something enter 'D', to come back press 'B'\n";
+
+		while (usersChoiceChar != 'D' && usersChoiceChar != 'B') {
+			std::cin >> userInput;
+			usersChoiceChar = userInput.at(0);
+			if (usersChoiceChar != 'D' && usersChoiceChar != 'B')
+			{
+				std::cout << "Make sure you enter one of those two options\n";
+			}
+		}
+	}
+
+	// drop an item
+	if (usersChoiceChar == 'D')
+	{
+		// ask which one to drop 
+		std::cout << "Which one?\n";
+		std::cin >> userInput;
+		
+		// validate
+		while (!(usersChoiceInt > 0 && usersChoiceInt <= player.inventory.size())) {
+			std::cin >> userInput;
+			try {
+				usersChoiceInt = stoi(userInput);
+				if (!(usersChoiceInt >= 0 && usersChoiceInt < player.inventory.size()))
+				{
+					std::cout << "Make sure you enter a number from a given range\n";
+				}
+			}
+			catch (const std::exception&) {
+				std::cout << "Make sure you enter a number from a given range\n";
+			}
+		}
+		// drop it
+		scene.items.push_back(player.inventory[usersChoiceInt - 1]);
+		std::vector<item>::iterator iterator = player.inventory.begin();
+		player.inventory.erase(iterator + usersChoiceInt - 1);
+	}
+
 }
 
 bool is_game_over() {
@@ -132,7 +258,7 @@ bool has_player_won(player player) {
 
 	bool has_player_won = false;
 
-	if (player.current_scene_x == FINAL_SIZE_X && player.current_scene_y == FINAL_SIZE_Y)
+	if (player.current_scene_x == FINAL_SCENE_X && player.current_scene_y == FINAL_SCENE_Y)
 	{
 		has_player_won = true;
 		display_final_message();
@@ -148,6 +274,54 @@ void display_final_message() {
 	std::cout << "Congratulation! You've made it after all!";
 }
 
+int users_options(scene scene) {
+
+	int state = -2;
+	int i = 0;
+	std::string users_input;
+
+	// display options:
+	std::cout << "\nWhat's your choice?" <<std::endl;
+	std::cout << ++i <<". MOVE" << std::endl;
+	std::cout << ++i << ". TAKE A LOOKA AT THE INVENTORY" << std::endl;
+	if (scene.items.size() > 0)
+	{
+		std::cout << ++i << ". PICK AN ITEM" << std::endl;
+	}
+	std::cout << "(h)elp" << ". ASK GENIE FOR HELP" << std::endl;
+	std::cout << "e(x)it" << ". WAKE UP (EXIT THE GAME)" << std::endl;
+
+	// validate user's input
+	while (state == -2) {
+
+		std::cin >> users_input;
+		std::transform(users_input.begin(), users_input.end(), users_input.begin(), ::toupper);
+
+		if (users_input.compare("HELP") == 0 || users_input.compare("H") == 0){
+			state = 4; //state HELP
+		}
+		else if (users_input.compare("EXIT") == 0 || users_input.compare("X") == 0){
+			state = -1; //break the main loop (and exit the game)
+		}
+		else{
+			try{
+				state = stoi(users_input);
+
+			}
+			catch (const std::exception&){
+				system("cls");
+				std::cout << "Make sure you enter the right thing";
+				_getch();
+				state = 0;
+			}
+		}
+
+	}
+
+	// redirect to appropriate state
+	return state;
+}
+
 void display_items_in_the_scene(scene scene) {
 
 	if (scene.items.size() > 0) {
@@ -159,6 +333,25 @@ void display_items_in_the_scene(scene scene) {
 			std::cout << i + 1 <<". " <<scene.items[i].name << " (" <<scene.items[i].weight << "kg)" << std::endl;
 		}
 
+	}
+
+}
+
+void display_items_in_the_inventory(player player) {
+
+	if (player.inventory.size() > 0) {
+
+		std::cout << "Your inventory:" << std::endl;
+
+		for (int i = 0; i < player.inventory.size(); i++)
+		{
+			std::cout << i + 1 << ". " << player.inventory[i].name << " (" << player.inventory[i].weight << "kg)" << std::endl;
+		}
+
+	}
+	else {
+		std::cout << "Looks like it's empty";
+		_getch();
 	}
 
 }
@@ -178,7 +371,7 @@ char isValidDirect(std::string input) {
 	return output;
 }
 // function works until user enters valid direction
-void goSomwhere(std::string direction) {
+void goSomwhere(std::string &direction) {
 	while (isValidDirect(direction) == 'X') {
 		std::cout << "You have chosen wrong direction. Try again" << std::endl;
 		std::cin >> direction;
@@ -199,4 +392,25 @@ void move(int& current_scene_x, int& current_scene_y, char direction) {
 	if (direction == 'W') {
 		current_scene_x--;
 	}
+}
+
+std::string isHelpNeeded(std::string help){
+	do
+	{
+		help.clear();
+		std::cout << "Type HELP or H to get help\n";
+		(std::cin >> help).get();
+		std::transform(help.begin(), help.end(), help.begin(), toupper);
+		std::cout << " ";
+
+	} while (help != "HELP" && help != "H");
+
+	return help;
+}
+
+void actualSceneHelp(int& current_scene_x, int& current_scene_y, scene scenes[WORLD_SIZE_Y][WORLD_SIZE_X]){
+
+	std::string actualHelp;
+	actualHelp = scenes[current_scene_x][current_scene_y].help;
+	std::cout << actualHelp;
 }
