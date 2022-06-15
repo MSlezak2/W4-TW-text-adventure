@@ -60,6 +60,7 @@ void to_read(std::string& file_name);
 
 int main() {
 	player one;
+	palyer two;
 	std::string userInput;
 
 	std::cout << "Where you want to go (N)ORTH, (S)OUTH, (E)AST, (W)EST? " << std::endl;
