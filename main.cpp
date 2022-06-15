@@ -47,7 +47,9 @@ void display_final_message();
 int main() {
 
 	player player_1; // zmienna reprezentujaca gracza
-	player player_3; 
+	player player_2; 
+
+	// komentarz do testow
 
 	player_1.current_scene_x = 0;
 	player_1.current_scene_y = 0;
