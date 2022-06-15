@@ -1,212 +1,129 @@
-#include <string>
 #include <iostream>
-#include <algorithm>
+#include <string>
+#include <cctype>
+#include <fstream>
 #include <vector>
 
-const int final_scene_x = 2;
-const int final_scene_y = 3;
 
-// osobne funkcje do poszczegolnych czynnosci (podnies, uzyj, idz(kierunek), ...)
-// HELP ZALEzNY OD OBECNEJ LOkalizacji (np. opis przedmiotow ktore sie tam znajduja)
-// warunek zwyciestwa uzaleznic od roznych rzeczy (meta, zebrane przedmioty itd)
-// przedmiot jako osobna struktura (imie, wage)
 
-struct item {
-	std::string name;
-	float weight;
-};
+// 
+std::string start_room{ "Hello stranger! Are you lost?\n"
+							"You just happen to find yourself in a magical labyrinth.\n"
+							"Unfortunately, there is only one way to escape. Be careful!\n" };
+
+std::string fairies_room{ "Welcome to the fairies’ room. Do you see these vials?\n "
+							"There are 3 elixirs to choose from. Remember, not all fairies are good.\n"
+							"You need to trust your intuition.\n" };
+
+std::string snakes_room{ "Oops! There are a lot of snakes!\n"
+							"To survive you must choose the right tool to defend yourself.\n" };
+
+std::string dragons_room{ "Oh no! You just woke up the dragon!\n"
+							"To calm him down you need to play him a lullaby.\n"
+							"There is only one instrument whose sound does not irritate him!\n" };
+
+std::string spiders_room{ "We got you! You have fallen into a huge spider web.\n" };
+
+std::string dwarves_room{ "Good to see you in the dwarves' home -they can help you.\n"
+							"However, they won't do it for free!\n" };
+
+std::string vampires_room{ "Do you know what vampires like the most?\n"
+							"Give your blood or die...\n " };
+
+std::string monsters_room{ "Have you ever heard about dangerous monsters?\n"
+							"This time it's not just a story. Defend yourself!\n" };
+
+std::string end_room{ "Wow, stranger, you are a good one. Congratulations! You are free! \n" };
+
+
+
 
 struct scene {
+	//char description[100];
+	//char possible_directions[10];
 	std::string description;
-	std::string possible_directions[4];
-	std::string name;
-	std::string help; 
+	std::string possible_directions;
+	// ... 
 };
 
 struct player {
 	int current_scene_x;
 	int current_scene_y;
 	std::string name;
-	std::string name1;
-
 };
-	
-std::string isHelpNeeded(std::string help);
-void actualSceneHelp(int& current_scene_x, int& current_scene_y, scene scenes[2][4]);
 
-char isValidDirect(std::string input);
-void goSomwhere(std::string direction);
-void move(int& current_scene_x, int& current_scene_y, char direction);
 
-scene scenes[3][4];
-
-bool is_game_over();
-bool has_player_won(player player);
-void display_final_message();
+char which_direct(std::string input);
+void is_valid_direct(std::string direction);
+void to_write(std::string& file_name);
+void to_read(std::string& file_name);
 
 int main() {
-
-	player player_1; // zmienna reprezentujaca gracza
-	player player_2; 
-
-	// komentarz do testow
-
-	player_1.current_scene_x = 0;
-	player_1.current_scene_y = 0;
-
-
-	std::string help;
-	scenes[0][0].help = "HELPPPPPP";
-
-
-	int state = 0; // obecny stan (patrz: schemat stanów)
+	player one;
+	palyer two;
 	std::string userInput;
-	char direction;
 
-	do
-	{
-		switch (state)
-		{
-		case 0: // stan SCENE
+	std::cout << "Where you want to go (N)ORTH, (S)OUTH, (E)AST, (W)EST? " << std::endl;
+	std::cin >> userInput;
+	is_valid_direct(userInput);
 
-			// wyswietl opis sceny (na podstawie wspolrzednych)
-			std::cout << scenes[player_1.current_scene_x][player_1.current_scene_y].description;
-			std::cout << "current_scene_x: " << player_1.current_scene_x << "\tcurrent_scene_y: " << player_1.current_scene_y << std::endl;
-
-			// wystwietl dostepne opcje (na podstawie wspolrzednych)
-			std::cout << "Where you want to go (N)ORTH, (S)OUTH, (E)AST, (W)EST? " << std::endl;
-
-			// zczytaj opcje wybrana przez uzytkownika (walidacja)
-			std::cin >> userInput;
-			goSomwhere(userInput);
-			direction = isValidDirect(userInput);
-
-			// zmien stan w zaleznosci od wybranej przez uzytkownika opcji
-			state = 1;
-
-			break;
-
-		case 1: // state MOVEMENT
-
-			// zmien wspolzedne 
-			move(player_1.current_scene_x, player_1.current_scene_y, direction);
-
-			// wroc do stanu SCENE
-			state = 0;
-			break;
-
-		case 2: // np. stan SOUTH
-
-			bool has_player_won = false;
-
-			if (player.current_scene_x == final_scene_x && player.current_scene_y == final_scene_y)
-			{
-				has_player_won = true;
-				display_final_message();
-			}
-
-
-		case 3: //help 
-
-			std::string help;
-
-			//isHelpNeeded(help);
-			actualSceneHelp(player_1.current_scene_x, player_1.current_scene_y, scenes);
-			state = 0;
-
-			break;
-		}
-	} while (!has_player_won(player_1));
-
+	system("PAUSE");
 	return 0;
 }
 
 
-
-bool is_game_over() {
-
-	return false;
-}
-
-bool has_player_won(player player) {
-
-	bool has_player_won = false;
-
-	if (player.current_scene_x == final_scene_x && player.current_scene_y == final_scene_y)
-	{
-		has_player_won = true;
-		display_final_message();
-	}
-
-	return has_player_won;
-}
-	
-
-void display_final_message() {
-
-	system("cls");
-
-	std::cout << "Congratulation! You've made it after all!";
-}
-/*
- @return string with correct  direction or X when input is invalid
+/**
+* check is input valid
+* 	//------- Possible move:
+*	//	 North	(N)
+*	//	 South	(S)
+*	//	 East	(E)
+*	//	 West	(W)
+*
+* @return string with correct  direction or X when input is invalid
 */
-char isValidDirect(std::string input) {
+char which_direct(std::string input) {
+
 	char output;
+
 	for (auto& element : input) { element = toupper(element); }
-	// TODO: Repair reading of mixed case words 
+
 	if (input == "N" || input == "NORTH") { output = 'N'; }
 	else if (input == "S" || input == "SOUTH") { output = 'S'; }
 	else if (input == "E" || input == "EAST") { output = 'E'; }
 	else if (input == "W" || input == "WEST") { output = 'W'; }
 	else { output = 'X'; }
+
+
 	return output;
+
 }
-// function works until user enters valid direction
-void goSomwhere(std::string direction) {
-	while (isValidDirect(direction) == 'X') {
-		std::cout << "You have chosen wrong direction. Try again" << std::endl;
+
+/**
+* function work until user enter valid direction
+*
+*/
+void is_valid_direct(std::string direction) {
+	while (which_direct(direction) == 'X') {
+		std::cout << "You choose wrong direction.Try again" << std::endl;
 		std::cin >> direction;
-		isValidDirect(direction);
 	}
 	std::cout << "Good move." << std::endl;
 }
-void move(int& current_scene_x, int& current_scene_y, char direction) {
-	if (direction == 'N'/* && scene???.possible_directions.find("N")<4*/) {
-		current_scene_y--;
+
+void to_write(std::string& file_name, player& one) {
+	std::fstream newFile;
+
+	newFile.open("game_save.dat", std::ios::out | std::ios::binary);
+
+	if (newFile.is_open()) {
+
+		newFile.write(reinterpret_cast<char*>(&one), sizeof(scene));
+		newFile.close();
 	}
-	if (direction == 'S') {
-		current_scene_y++;
-	}
-	if (direction == 'E') {
-		current_scene_x++;
-	}
-	if (direction == 'W') {
-		current_scene_x--;
-	}
+	else
+		std::cout << "ERROR!" << std::endl;
+
 }
 
 
-std::string isHelpNeeded(std::string help)
-
-{
-	do
-	{
-		help.clear();
-		std::cout << "Type HELP or H to get help\n";
-		(std::cin >> help).get();
-		std::transform(help.begin(), help.end(), help.begin(), toupper);
-		std::cout << " ";
-
-	} while (help != "HELP" && help != "H");
-
-	return help;
-}
-
-void actualSceneHelp(int current_scene_x, int current_scene_y, scene scenes[2][4])
-{
-	std::string actualHelp;
-	actualHelp = scenes[current_scene_x][current_scene_y].help;
-	std::cout << actualHelp;
-	
-}
