@@ -7,7 +7,7 @@
 
 struct scene {
 	std::string description;
-	std::string possible_directions[4];
+	std::string possible_directions;
 	// ... 
 };
 
@@ -18,14 +18,24 @@ struct player {
 };
 
 char isValidDirect(std::string input);
-void goSomwhere(std::string direction);
+void goSomwhere(std::string &direction);
 void move(int& current_scene_x, int& current_scene_y, char direction);
 
-scene scenes[2][4];
+scene scenes[3][4];
 
 int main() {
-
-	std::cout << "Czolem kluski z rosolem" << std::endl;
+	scenes[0][0].possible_directions = "E";
+	scenes[0][1].possible_directions = "SEW";
+	scenes[0][2].possible_directions = "SEW";
+	scenes[0][3].possible_directions = "S";
+	scenes[1][0].possible_directions = "NSEW";
+	scenes[1][1].possible_directions = "NS";
+	scenes[1][2].possible_directions = "N";
+	scenes[1][3].possible_directions = "NS";
+	scenes[2][0].possible_directions = "NSEW";
+	scenes[2][1].possible_directions = "N";
+	scenes[2][2].possible_directions = "NSEW";
+	scenes[2][3].possible_directions = "N";
 	player player_1; // zmienna reprezentujaca gracza
 	player_1.current_scene_x = 0;
 	player_1.current_scene_y = 0;
@@ -41,7 +51,7 @@ int main() {
 		case 0: // stan SCENE
 
 			// wyswietl opis sceny (na podstawie wspolrzednych)
-			std::cout << scenes[player_1.current_scene_x][player_1.current_scene_y].description;
+			//std::cout << scenes[player_1.current_scene_x][player_1.current_scene_y].description;
 			std::cout << "current_scene_x: " << player_1.current_scene_x << "\tcurrent_scene_y: " << player_1.current_scene_y << std::endl;
 
 			// wystwietl dostepne opcje (na podstawie wspolrzednych)
@@ -73,7 +83,6 @@ int main() {
 	return 0;
 }
 
-
 /*
 	check is input valid
 	//------- Possible move:
@@ -81,7 +90,6 @@ int main() {
 	//	 South	(S)
 	//	 East	(E)
 	//	 West	(W)
-
  @return string with correct  direction or X when input is invalid
 */
 char isValidDirect(std::string input) {
@@ -96,25 +104,28 @@ char isValidDirect(std::string input) {
 	return output;
 }
 // function works until user enters valid direction
-void goSomwhere(std::string direction) {
+void goSomwhere(std::string &direction) {
 	while (isValidDirect(direction) == 'X') {
 		std::cout << "You have chosen wrong direction. Try again" << std::endl;
 		std::cin >> direction;
-		isValidDirect(direction);
 	}
 	std::cout << "Good move." << std::endl;
 }
 void move(int& current_scene_x, int& current_scene_y, char direction) {
-	if (direction == 'N'/* && scene???.possible_directions.find("N")<4*/) {
+	if (direction == 'N' && (scenes[current_scene_y][current_scene_x].possible_directions.find('N') != std::string::npos)) {
 		current_scene_y--;
 	}
-	if (direction == 'S') {
+	else if (direction == 'S' && (scenes[current_scene_y][current_scene_x].possible_directions.find('S') != std::string::npos)) {
 		current_scene_y++;
 	}
-	if (direction == 'E') {
+	else if (direction == 'E' && (scenes[current_scene_y][current_scene_x].possible_directions.find('E') != std::string::npos)) {
 		current_scene_x++;
 	}
-	if (direction == 'W') {
+	else if (direction == 'W' && (scenes[current_scene_y][current_scene_x].possible_directions.find('W') != std::string::npos)) {
 		current_scene_x--;
+	}
+	else{
+		std::cout << "You can't go there!\n";
+		return;
 	}
 }
