@@ -11,6 +11,8 @@ const int WORLD_SIZE_Y = 3;
 const int FINAL_SCENE_X = 2;
 const int FINAL_SCENE_Y = 3;
 
+const int MAX_WEIGHT = 80;
+
 // osobne funkcje do poszczegolnych czynnosci (podnies, uzyj, idz(kierunek), ...)
 // HELP ZALEzNY OD OBECNEJ LOkalizacji (np. opis przedmiotow ktore sie tam znajduja)
 // warunek zwyciestwa uzaleznic od roznych rzeczy (meta, zebrane przedmioty itd)
@@ -35,6 +37,7 @@ struct player {
 	int current_scene_y;
 	std::string name;
 	std::vector<item> inventory; // ekwipunek gracza
+	int hp;
 };
 	
 char isValidDirect(std::string input);
@@ -51,11 +54,13 @@ void display_items_in_the_inventory(player player);
 //void pickAnItem(player player, );
 
 void state_movement(player &player);
-void state_pick(scene &scene, player &player);
+void state_pick(scene &scene, player &player, bool oneOfN);
 void state_inventory(scene &scene, player &player);
 
 std::string isHelpNeeded(std::string help);
 void actualSceneHelp(int& current_scene_x, int& current_scene_y, scene scenes[WORLD_SIZE_Y][WORLD_SIZE_X]);
+bool isTooHeavy(player player, item givenItem);
+void loadData(player &player, scene scenes[WORLD_SIZE_Y][WORLD_SIZE_X]);
 
 int main() {
 
@@ -65,9 +70,11 @@ int main() {
 	scene scenes[WORLD_SIZE_Y][WORLD_SIZE_X]; // tablica scen (pokoi) reprezentujaca swiat gry
 	player player_1; // zmienna reprezentujaca gracza
 
+	loadData(player_1, scenes);
+
 	player_1.current_scene_x = 0;
 	player_1.current_scene_y = 0;
-	scenes[0][0].items = { {"miecz", "",1}, {"tarcza", "", 2} };
+	scenes[0][0].items = { {"miecz", ""/*,1*/}, {"tarcza", ""/*, 2*/}};
 	scenes[0][0].help = "help";
 	scenes[0][0].description = { "Hello stranger! Are you lost?\n"
 							"You just happen to find yourself in a magical labyrinth.\n"
@@ -119,7 +126,7 @@ int main() {
 		case 3: // state PICK
 		{
 
-			state_pick(scenes[player_1.current_scene_y][player_1.current_scene_x], player_1);
+			state_pick(scenes[player_1.current_scene_y][player_1.current_scene_x], player_1, false);
 
 			// wroc do stanu SCENE
 			state = 0;
@@ -167,7 +174,8 @@ void state_movement(player &player) {
 	move(player.current_scene_x, player.current_scene_y, direction);
 }
 
-void state_pick(scene &scene, player &player) {
+void state_pick(scene &scene, player &player, bool oneOfN) {
+	// parameter oneOfN determines what happens to items that hasn't been chosen (desappear or remain)
 
 	int usersChoice = 0;
 	std::string userInput;
@@ -191,9 +199,21 @@ void state_pick(scene &scene, player &player) {
 	}
 
 	// jesli nie przekroczymy wagi to przenies do ekwipunku i usun z pokoju (Iza sprawdza ta wage)
-	player.inventory.push_back(scene.items[usersChoice - 1]);
-	std::vector<item>::iterator iterator = scene.items.begin();
-	scene.items.erase(iterator + usersChoice - 1);
+	if (!isTooHeavy(player, scene.items[usersChoice - 1] ))
+	{
+		player.inventory.push_back(scene.items[usersChoice - 1]);
+		std::vector<item>::iterator iterator = scene.items.begin();
+		scene.items.erase(iterator + usersChoice - 1);
+		if (oneOfN) 
+		{
+			scene.items.clear();
+		}
+	}
+	else {
+		std::cout << "\nYour equipment would be too heavy for you to carry. You need make room for that item first...\n";
+		_getch();
+	}
+	
 }
 
 void state_inventory(scene& scene, player& player) {
@@ -225,7 +245,6 @@ void state_inventory(scene& scene, player& player) {
 	{
 		// ask which one to drop 
 		std::cout << "Which one?\n";
-		std::cin >> userInput;
 		
 		// validate
 		while (!(usersChoiceInt > 0 && usersChoiceInt <= player.inventory.size())) {
@@ -330,7 +349,7 @@ void display_items_in_the_scene(scene scene) {
 
 		for (int i = 0; i < scene.items.size(); i++)
 		{
-			std::cout << i + 1 <<". " <<scene.items[i].name << " (" <<scene.items[i].weight << "kg)" << std::endl;
+			std::cout << i + 1 <<". " <<scene.items[i].name /* << " (" << scene.items[i].weight << "kg)" */ << std::endl;
 		}
 
 	}
@@ -345,7 +364,7 @@ void display_items_in_the_inventory(player player) {
 
 		for (int i = 0; i < player.inventory.size(); i++)
 		{
-			std::cout << i + 1 << ". " << player.inventory[i].name << " (" << player.inventory[i].weight << "kg)" << std::endl;
+			std::cout << i + 1 << ". " << player.inventory[i].name /* << " (" << player.inventory[i].weight << "kg)" */ << std::endl;
 		}
 
 	}
@@ -410,7 +429,48 @@ std::string isHelpNeeded(std::string help){
 
 void actualSceneHelp(int& current_scene_x, int& current_scene_y, scene scenes[WORLD_SIZE_Y][WORLD_SIZE_X]){
 
-	std::string actualHelp;
-	actualHelp = scenes[current_scene_x][current_scene_y].help;
-	std::cout << actualHelp;
+	//std::string actualHelp;
+	//actualHelp = scenes[current_scene_x][current_scene_y].help;
+	//std::cout << actualHelp;
+ 
+	// wyswietl wspolnego helpa
+
+	// wyswietl liste przedmiotow z ich nazwa opisem i waga
+
+}
+
+bool isTooHeavy(player player, item given_item) {
+
+	bool isTooHeavy = false;
+
+	int itemWeight = given_item.weight;
+	std::vector<item> equipment = player.inventory;
+
+	int equipmentWeight = 0;
+
+	for (int i = 0; i < equipment.size(); i++)
+	{
+		equipmentWeight += equipment[i].weight;
+	}
+
+	if (itemWeight + equipmentWeight > MAX_WEIGHT)
+	{
+		isTooHeavy = true;
+	}
+
+	return isTooHeavy;
+}
+
+void loadData(player& player, scene scenes[WORLD_SIZE_Y][WORLD_SIZE_X]) {
+
+	scenes[0][0].items = {};
+	scenes[0][0].description = { "Hello stranger! Are you lost?\n"
+							"You just happen to find yourself in a magical labyrinth.\n"
+							"Unfortunately, there is only one way to escape. Be careful!\n\n" };
+	scenes[0][1].items = { {"red elixir", "allows to break free from a certain room", 40}, {/*drugi item*/}};
+	scenes[0][1].description = { "Hello stranger! Are you lost?\n"
+							"You just happen to find yourself in a magical labyrinth.\n"
+							"Unfortunately, there is only one way to escape. Be careful!\n\n" };
+
+
 }
