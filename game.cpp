@@ -12,7 +12,7 @@ void stateMovement(scene scene, player& player) {
 	char direction;
 	std::string userInput;
 
-	if (scene.problemSolved == false && !(player.currentSceneX == 0 && player.currentSceneY == 0)) {
+	if (scene.problemSolved == false && !(player.currentSceneX == 0 && player.currentSceneY == 0) && !(player.currentSceneX == 1 && player.currentSceneY == 0)) {
 		system("cls");
 		std::cout << "Running away is seldom the right option...\n";
 		_getch();
@@ -45,7 +45,7 @@ void statePick(scene& scene, player& player, bool oneOfN) {
 	std::cout << "\nWhich one do you choose?" << std::endl;
 	// odczytaj odpowiedz (walidacja)
 
-	while (usersChoice == 0) {
+	while (usersChoice <= 0 || usersChoice > scene.items.size()) {
 		std::cin >> userInput;
 		try {
 			usersChoice = stoi(userInput);
@@ -84,14 +84,14 @@ void stateInventory(scene& scene, player& player) {
 
 	// ask user if he wants to drop something or just come back
 	if (player.inventory.size() > 0) {
-		std::cout << "\nTo drop something enter 'D', to come back press 'B'\n";
+		std::cout << "\nTo drop something enter 'D', to use one enter 'U', to come back press 'B'\n";
 
-		while (usersChoiceChar != 'D' && usersChoiceChar != 'B') {
+		while (usersChoiceChar != 'D' && usersChoiceChar != 'B' && usersChoiceChar != 'U') {
 			std::cin >> userInput;
 			usersChoiceChar = userInput.at(0);
-			if (usersChoiceChar != 'D' && usersChoiceChar != 'B')
+			if (usersChoiceChar != 'D' && usersChoiceChar != 'B' && usersChoiceChar != 'U')
 			{
-				std::cout << "Make sure you enter one of those two options\n";
+				std::cout << "Make sure you enter one of those three options\n";
 			}
 		}
 	}
@@ -101,7 +101,7 @@ void stateInventory(scene& scene, player& player) {
 	{
 		// ask which one to drop 
 		std::cout << "Which one?\n";
-
+		
 		// validate
 		while (!(usersChoiceInt > 0 && usersChoiceInt <= player.inventory.size())) {
 			std::cin >> userInput;
@@ -122,6 +122,37 @@ void stateInventory(scene& scene, player& player) {
 		player.inventory.erase(iterator + usersChoiceInt - 1);
 	}
 
+	// use item
+	if (usersChoiceChar == 'U')
+	{
+		// ask which one to drop 
+		std::cout << "Which one?\n";
+
+		usersChoiceInt = -1;
+		// validate
+		while (!(usersChoiceInt > 0 && usersChoiceInt <= player.inventory.size())) {
+			std::cin >> userInput;
+			try {
+				usersChoiceInt = stoi(userInput);
+				if (!(usersChoiceInt >= 0 && usersChoiceInt < player.inventory.size()))
+				{
+					std::cout << "Make sure you enter a number from a given range\n";
+				}
+			}
+			catch (const std::exception&) {
+				std::cout << "Make sure you enter a number from a given range\n";
+			}
+		}
+		// use it
+		if (player.currentSceneX == player.inventory[usersChoiceInt - 1].whereToUseX && player.currentSceneY == player.inventory[usersChoiceInt - 1].whereToUseY) {
+			scene.problemSolved = true;
+		}
+		else {
+			system("cls");
+			std::cout << "Unfortunatelly, you can't use that in here. Try something else\n";
+			_getch();
+		}
+	}
 }
 
 bool isGameOver() {
@@ -151,7 +182,6 @@ void displayGoodByeMessage() {
 void displayFinalMessage() {
 
 	system("cls");
-
 	std::cout << "Congratulation! You've made it after all!\n";
 	_getch();
 }
@@ -174,7 +204,7 @@ int usersOptions(scene scene) {
 	std::cout << "e(x)it" << ". WAKE UP (EXIT THE GAME)" << std::endl;
 
 	// validate user's input
-	while (state == -2) {
+	while (state != -1 && state != 4 && !(state >= 0 && state <= i) ) {
 
 		std::cin >> users_input;
 		std::transform(users_input.begin(), users_input.end(), users_input.begin(), ::toupper);
@@ -341,26 +371,26 @@ void loadData(player& player, scene scenes[WORLD_SIZE_Y][WORLD_SIZE_X]) {
 							"Unfortunately, there is only one way to escape. Be careful!\n\n" };
 
 	scenes[0][1].name = { "FAIRIES’ ROOM \n" };
-	scenes[0][1].items = { {"red elixir", "allows to break free from a certain room", 40},
-						{"blue elixir", "allows to open a certain door", 40},
-						{"green elixir", "allows to open a certain door", 40} };
+	scenes[0][1].problemSolved = false;
+	scenes[0][1].items = { {"red elixir", "allows to break free from a certain room", 1, 2, 40},
+						{"blue elixir", "allows to open a certain door", 3, 1, 40},
+						{"green elixir", "allows to open a certain door", 3, 0, 40} };
 
 	scenes[0][1].description = { "Welcome to the fairies’ room. Do you see these vials?\n"
 							"There are 3 elixirs to choose from. Remember, not all fairies are good. \n"
 							"You need to trust your intuition." };
 
 	scenes[0][2].name = { "SNAKES’ ROOM \n" };
-	scenes[0][2].items = { {" arc ", "to use it you need to leave one item and you are going to lose your health points",30},
-							{"spear", "to use it you need to leave 2 items", 20},
-						{"magic liquid", "allows to open a certain door", 40} };
+	scenes[0][2].items = { {" arc ", "to use it you need to leave one item and you are going to lose your health points", 2, 0, 30},
+							{"spear", "to use it you need to leave 2 items", 2, 0, 20},
+						{"magic liquid", "allows to open a certain door", 2, 0, 40} };
 
 	scenes[0][2].description = { "Oops! There are a lot of snakes! \n"
 							"To survive you must choose the right tool to defend yourself.\n\n" };
 
 	scenes[0][3].name = { "DRAGONS’ ROOM\n" };
-	scenes[0][3].items = { {"flute", "you need to leave one item",20},
-							{"spear", "to use it you need to leave 2 items", 30},
-						{"green elixir", "you can use here a  green elixir and continue the game without losing your health points", 40} };
+	scenes[0][3].items = { {"flute", "you need to leave one item", 3, 0, 20},
+							{"spear", "to use it you need to leave 2 items", 3, 0, 30} };
 
 	scenes[0][3].description = { "Oh no! You just woke up the dragon! To calm him down you need to play him a lullaby.  \n"
 							"There is only one instrument whose sound does not irritate him!\n\n" };
@@ -371,24 +401,23 @@ void loadData(player& player, scene scenes[WORLD_SIZE_Y][WORLD_SIZE_X]) {
 	scenes[1][0].description = { };
 
 	scenes[1][1].name = { "SPIDERS’ ROOM\n" };
-	scenes[1][1].items = { {"freezing power ", "you are going to lose your health points  - 40",20},
-							{"flute", "you need to leave one item", 20},
-							{"gas", "you need to leave one item and you are going to lose your health points-10", 20} };
+	scenes[1][1].items = { {"freezing power ", "you are going to lose your health points  - 40", 1, 1, 20},
+							{"flute", "you need to leave one item", 1, 1, 20},
+							{"gas", "you need to leave one item and you are going to lose your health points-10", 1, 1, 20} };
 
 	scenes[1][1].description = { "We got you! You have fallen into a huge spider web.!\n\n" };
 
 	scenes[1][2].name = { "DWARVES ROOM\n" };
-	scenes[1][2].items = { {"healing pill", "adding 80 health points but you need to leave 2 items",20},
-							{"bangade", "adding 50 health points but you need to leave one item", 20},
-							{"magic liquid", "leave here magic liquid and you are going to get 50 health points", 20} };
+	scenes[1][2].items = { {"healing pill", "adding 80 health points but you need to leave 2 items", 2, 1, 20},
+							{"bangade", "adding 50 health points but you need to leave one item", 2, 1, 20},
+							{"magic liquid", "leave here magic liquid and you are going to get 50 health points", 2, 1, 20} };
 
 	scenes[1][2].description = { "Good to see you in the dwarves' home -they can help you.\n"
 								"However, they won't do it for free!!\n\n" };
 
 	scenes[1][3].name = { "VAMPIRES’ ROOM\n" };
-	scenes[1][3].items = { {"syringe", "alive but you will lose your power -50:)",20},
-							{"arc", "to use it you need to leave one item and you are going to lose your health points -10) ", 20},
-							{"blue elixir", "you can use here a blue elixir to go out  from labyrinth", 20} };
+	scenes[1][3].items = { {"syringe", "alive but you will lose your power -50:)", 3, 1, 20},
+							{"arc", "to use it you need to leave one item and you are going to lose your health points -10) ", 3, 1, 20}};
 
 	scenes[1][3].description = { "Do you know what vampires like the most ? Give your blood or die.\n\n" };
 
@@ -397,9 +426,8 @@ void loadData(player& player, scene scenes[WORLD_SIZE_Y][WORLD_SIZE_X]) {
 	scenes[2][0].description = { };
 
 	scenes[2][1].name = { "MONSTERS’ ROOM \n" };
-	scenes[2][1].items = { {"silver sword ", "you need to leave one item and you are going to lose your health points-30)",30},
-							{"violin", "you are going to lose your health points-40)) ", 30},
-							{"red elixir ", "you can use here a red elixir and go out without losing your health points", 20} };
+	scenes[2][1].items = { {"silver sword ", "you need to leave one item and you are going to lose your health points-30)", 1, 2, 30},
+							{"violin", "you are going to lose your health points-40)) ", 1, 2, 30} };
 
 	scenes[2][1].description = { "Have you ever heard about dangerous monsters?\n"
 								"This time it's not just a story. Defend yourself!\n\n" };

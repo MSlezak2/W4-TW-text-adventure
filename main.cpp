@@ -56,7 +56,7 @@ int main() {
 
 		case 2: // state INVENTORY
 
-			stateInventory(scenes[player_1.currentSceneY][player_1.currentSceneY], player_1);
+			stateInventory(scenes[player_1.currentSceneY][player_1.currentSceneX], player_1);
 		
 			state = 0;
 			break;

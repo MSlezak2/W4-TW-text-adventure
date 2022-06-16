@@ -14,6 +14,8 @@ const  std::string HELP = "Every room has its own rules and every item has its o
 struct item {
 	std::string name;
 	std::string description;
+	int whereToUseX;
+	int whereToUseY;
 	int weight;
 };
 
