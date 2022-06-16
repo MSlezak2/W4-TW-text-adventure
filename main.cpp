@@ -75,18 +75,6 @@ int main() {
 
 	// Dane programu:
 	scene scenes[WORLD_SIZE_Y][WORLD_SIZE_X]; // tablica scen (pokoi) reprezentujaca swiat gry
-	scenes[0][0].possible_directions = "E";
-	scenes[0][1].possible_directions = "SEW";
-	scenes[0][2].possible_directions = "SEW";
-	scenes[0][3].possible_directions = "S";
-	scenes[1][0].possible_directions = "NSEW";
-	scenes[1][1].possible_directions = "NS";
-	scenes[1][2].possible_directions = "N";
-	scenes[1][3].possible_directions = "NS";
-	scenes[2][0].possible_directions = "NSEW";
-	scenes[2][1].possible_directions = "N";
-	scenes[2][2].possible_directions = "NSEW";
-	scenes[2][3].possible_directions = "N";
 	player player_1; // zmienna reprezentujaca gracza
 
 	loadData(player_1, scenes);
@@ -110,7 +98,7 @@ int main() {
 		case 0: // stan SCENE
 			// wyswietl opis sceny (na podstawie wspolrzednych)
 			system("cls");
-			std::cout << scenes[player_1.current_scene_y][player_1.current_scene_x].name << std::endl << std::endl;
+			std::cout << scenes[player_1.current_scene_y][player_1.current_scene_x].name << std::endl;
 			if (!scenes[player_1.current_scene_y][player_1.current_scene_x].problemSolved)
 			{
 				std::cout << scenes[player_1.current_scene_y][player_1.current_scene_x].description;
@@ -594,5 +582,18 @@ void loadData(player& player, scene scenes[WORLD_SIZE_Y][WORLD_SIZE_X]) {
 		scenes[2][3].items = { };
 		scenes[2][3].description = { "Wow, stranger, you are a good one. Congratulations! You are free!!\n\n" };
 
+
+		scenes[0][0].possible_directions = "E";
+		scenes[0][1].possible_directions = "SEW";
+		scenes[0][2].possible_directions = "SEW";
+		scenes[0][3].possible_directions = "S";
+		scenes[1][0].possible_directions = "NSEW";
+		scenes[1][1].possible_directions = "NS";
+		scenes[1][2].possible_directions = "N";
+		scenes[1][3].possible_directions = "NS";
+		scenes[2][0].possible_directions = "NSEW";
+		scenes[2][1].possible_directions = "N";
+		scenes[2][2].possible_directions = "NSEW";
+		scenes[2][3].possible_directions = "N";
 }
 
