@@ -457,15 +457,18 @@ std::string isHelpNeeded(std::string help){
 	return help;
 }
 
-void actualSceneHelp(int& current_scene_x, int& current_scene_y, scene scenes[WORLD_SIZE_Y][WORLD_SIZE_X]){
+void actualSceneHelp(int& current_scene_x, int& current_scene_y, scene scenes[WORLD_SIZE_Y][WORLD_SIZE_X]) {
 
-	//std::string actualHelp;
-	//actualHelp = scenes[current_scene_x][current_scene_y].help;
-	//std::cout << actualHelp;
- 
-	// wyswietl wspolnego helpa
 
-	// wyswietl liste przedmiotow z ich nazwa opisem i waga
+	std::cout << help << std::endl;
+	for (int i = 0; i < scenes[current_scene_y][current_scene_x].items.size(); i++) {
+		std::cout << scenes[current_scene_y][current_scene_x].items[i].name << "  ";
+		std::cout << scenes[current_scene_y][current_scene_x].items[i].description << "   ";
+		std::cout << scenes[current_scene_y][current_scene_x].items[i].weight << "   ";
+		std:cout << "\n";
+
+	}
+
 
 }
 
