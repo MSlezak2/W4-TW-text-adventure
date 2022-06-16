@@ -13,7 +13,7 @@ const int FINAL_SCENE_Y = 2;
 
 const int MAX_WEIGHT = 80;
 
-const std::string successString = "Congratulations, you solved all the problems here...\n";
+const std::string SUCCESS_MESSAGE = "Congratulations, you solved all the problems here...\n";
 
 // osobne funkcje do poszczegolnych czynnosci (podnies, uzyj, idz(kierunek), ...)
 // HELP ZALEzNY OD OBECNEJ LOkalizacji (np. opis przedmiotow ktore sie tam znajduja)
@@ -23,7 +23,7 @@ const std::string successString = "Congratulations, you solved all the problems 
 struct item {
 	std::string name;
 	std::string description;
-	// pole przechowujace mozliwe lokacje w ktorych mozna go uzyc
+	//int coordinates[5];// pole przechowujace mozliwe lokacje w ktorych mozna go uzyc
 	int weight;
 };
 
@@ -31,7 +31,7 @@ struct scene {
 	std::string description;
 	std::string possible_directions[4];
 	std::string name;
-	bool problemSolved; // raz rozwiazany problem nie powinien sie pojawiac ponownie
+	bool problemSolved = false; // raz rozwiazany problem nie powinien sie pojawiac ponownie
 	std::vector<item> items; // jakie przedmioty znajduja sie w danej scenie (pokoju)
 };
 
@@ -57,7 +57,7 @@ void display_items_in_the_scene(scene scene);
 void display_items_in_the_inventory(player player);
 //void pickAnItem(player player, );
 
-void state_movement(player &player);
+void state_movement(scene scene, player& player);
 void state_pick(scene &scene, player &player, bool oneOfN);
 void state_inventory(scene &scene, player &player);
 
@@ -95,7 +95,16 @@ int main() {
 		case 0: // stan SCENE
 			// wyswietl opis sceny (na podstawie wspolrzednych)
 			system("cls");
-			std::cout << scenes[player_1.current_scene_y][player_1.current_scene_x].description;
+			std::cout << scenes[player_1.current_scene_y][player_1.current_scene_x].name << std::endl << std::endl;
+			if (!scenes[player_1.current_scene_y][player_1.current_scene_x].problemSolved)
+			{
+				std::cout << scenes[player_1.current_scene_y][player_1.current_scene_x].description;
+			}
+			else
+			{
+				std::cout << SUCCESS_MESSAGE;
+			}
+
 			display_items_in_the_scene(scenes[player_1.current_scene_y][player_1.current_scene_x]);
 
 			//test:
@@ -117,7 +126,7 @@ int main() {
 
 		case 1: // state MOVEMENT
 
-			state_movement(player_1);
+			state_movement(scenes[player_1.current_scene_y][player_1.current_scene_x], player_1);
 
 			// wroc do stanu SCENE
 			state = 0;
@@ -164,20 +173,28 @@ int main() {
 	return 0;
 }
 
-void state_movement(player &player) {
+void state_movement(scene scene, player &player) {
 
 	char direction;
 	std::string userInput;
 
-	system("cls");
-	std::cout << "\nWhere you want to go (N)ORTH, (S)OUTH, (E)AST, (W)EST? " << std::endl;
+	if (scene.problemSolved == false && !(player.current_scene_x == 0 && player.current_scene_y == 0)) {
+		system("cls");
+		std::cout << "Running away is seldom the right option...\n";
+		_getch();
+	}
+	else {
+		system("cls");
+		std::cout << "Where you want to go (N)ORTH, (S)OUTH, (E)AST, (W)EST? " << std::endl;
 
-	std::cin >> userInput;
-	goSomwhere(userInput);
-	direction = isValidDirect(userInput);
+		std::cin >> userInput;
+		goSomwhere(userInput);
+		direction = isValidDirect(userInput);
 
-	// zmien wspolzedne 
-	move(player.current_scene_x, player.current_scene_y, direction);
+		// zmien wspolzedne 
+		move(player.current_scene_x, player.current_scene_y, direction);
+	}
+
 }
 
 void state_pick(scene &scene, player &player, bool oneOfN) {
@@ -478,6 +495,7 @@ void loadData(player& player, scene scenes[WORLD_SIZE_Y][WORLD_SIZE_X]) {
 
 		scenes[0][0].name = "START";
 		scenes[0][0].items = {};
+		scenes[0][0].problemSolved = false;
 		scenes[0][0].description = { "Hello stranger! Are you lost?\n"
 								"You just happen to find yourself in a magical labyrinth.\n"
 								"Unfortunately, there is only one way to escape. Be careful!\n\n" };
