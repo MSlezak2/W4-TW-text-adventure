@@ -33,7 +33,7 @@ struct item {
 
 struct scene {
 	std::string description;
-	std::string possible_directions[4];
+	std::string possible_directions;
 	std::string name;
 	bool problemSolved = false; // raz rozwiazany problem nie powinien sie pojawiac ponownie
 	std::vector<item> items; // jakie przedmioty znajduja sie w danej scenie (pokoju)
@@ -49,7 +49,7 @@ struct player {
 	
 char isValidDirect(std::string input);
 void goSomwhere(std::string &direction);
-void move(int& current_scene_x, int& current_scene_y, char direction);
+void move(int& current_scene_x, int& current_scene_y, char direction, scene scene);
 
 bool is_game_over();
 bool has_player_won(player player);
@@ -207,7 +207,7 @@ void state_movement(scene scene, player &player) {
 		direction = isValidDirect(userInput);
 
 		// zmien wspolzedne 
-		move(player.current_scene_x, player.current_scene_y, direction);
+		move(player.current_scene_x, player.current_scene_y, direction, scene);
 	}
 
 }
@@ -441,23 +441,23 @@ void goSomwhere(std::string &direction) {
 		std::cout << "You have chosen wrong direction. Try again" << std::endl;
 		std::cin >> direction;
 	}
-	std::cout << "Good move." << std::endl;
 }
-void move(int& current_scene_x, int& current_scene_y, char direction) {
-	if (direction == 'N' && (scenes[current_scene_y][current_scene_x].possible_directions.find('N') != std::string::npos)) {
+void move(int& current_scene_x, int& current_scene_y, char direction, scene scene) {
+	if (direction == 'N' && (scene.possible_directions.find('N') != std::string::npos)) {
 		current_scene_y--;
 	}
-	else if (direction == 'S' && (scenes[current_scene_y][current_scene_x].possible_directions.find('S') != std::string::npos)) {
+	else if (direction == 'S' && (scene.possible_directions.find('S') != std::string::npos)) {
 		current_scene_y++;
 	}
-	else if (direction == 'E' && (scenes[current_scene_y][current_scene_x].possible_directions.find('E') != std::string::npos)) {
+	else if (direction == 'E' && (scene.possible_directions.find('E') != std::string::npos)) {
 		current_scene_x++;
 	}
-	else if (direction == 'W' && (scenes[current_scene_y][current_scene_x].possible_directions.find('W') != std::string::npos)) {
+	else if (direction == 'W' && (scene.possible_directions.find('W') != std::string::npos)) {
 		current_scene_x--;
 	}
 	else {
 		std::cout << "You can't go there!\n";
+		_getch();
 		return;
 	}
 }
