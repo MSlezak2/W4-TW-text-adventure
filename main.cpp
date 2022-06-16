@@ -8,10 +8,12 @@
 const int WORLD_SIZE_X = 4;
 const int WORLD_SIZE_Y = 3;
 
-const int FINAL_SCENE_X = 2;
-const int FINAL_SCENE_Y = 3;
+const int FINAL_SCENE_X = 3;
+const int FINAL_SCENE_Y = 2;
 
 const int MAX_WEIGHT = 80;
+
+const std::string successString = "Congratulations, you solved all the problems here...\n";
 
 // osobne funkcje do poszczegolnych czynnosci (podnies, uzyj, idz(kierunek), ...)
 // HELP ZALEzNY OD OBECNEJ LOkalizacji (np. opis przedmiotow ktore sie tam znajduja)
@@ -21,6 +23,7 @@ const int MAX_WEIGHT = 80;
 struct item {
 	std::string name;
 	std::string description;
+	// pole przechowujace mozliwe lokacje w ktorych mozna go uzyc
 	int weight;
 };
 
@@ -28,7 +31,7 @@ struct scene {
 	std::string description;
 	std::string possible_directions[4];
 	std::string name;
-	std::string help;
+	bool problemSolved; // raz rozwiazany problem nie powinien sie pojawiac ponownie
 	std::vector<item> items; // jakie przedmioty znajduja sie w danej scenie (pokoju)
 };
 
@@ -46,6 +49,7 @@ void move(int& current_scene_x, int& current_scene_y, char direction);
 
 bool is_game_over();
 bool has_player_won(player player);
+void displayGoodByeMessage();
 void display_final_message();
 
 int users_options(scene scene);
@@ -104,7 +108,10 @@ int main() {
 			// (taki ogolny) i zczytujemy dalej
 
 			// zmien stan w zaleznosci od wybranej przez uzytkownika opcji
-			state = users_options(scenes[player_1.current_scene_y][player_1.current_scene_x]);
+			if (!has_player_won(player_1))
+			{
+				state = users_options(scenes[player_1.current_scene_y][player_1.current_scene_x]);
+			}
 
 			break;
 
@@ -149,10 +156,9 @@ int main() {
 
 	} while (!has_player_won(player_1) && state != -1);
 
-	if (state = -1)
+	if (state = -1 && !has_player_won(player_1))
 	{
-		system("cls");
-		std::cout << "\nUfff... It was just a dream after all\n";
+		displayGoodByeMessage();
 	}
 
 	return 0;
@@ -286,11 +292,18 @@ bool has_player_won(player player) {
 	return has_player_won;
 }
 
+void displayGoodByeMessage() {
+	system("cls");
+	std::cout << "Ufff... It was just a dream after all\n";
+	_getch();
+}
+
 void display_final_message() {
 
 	system("cls");
 
-	std::cout << "Congratulation! You've made it after all!";
+	std::cout << "Congratulation! You've made it after all!\n";
+	_getch();
 }
 
 int users_options(scene scene) {
@@ -463,14 +476,15 @@ bool isTooHeavy(player player, item given_item) {
 
 void loadData(player& player, scene scenes[WORLD_SIZE_Y][WORLD_SIZE_X]) {
 
+		scenes[0][0].name = "START";
 		scenes[0][0].items = {};
 		scenes[0][0].description = { "Hello stranger! Are you lost?\n"
 								"You just happen to find yourself in a magical labyrinth.\n"
 								"Unfortunately, there is only one way to escape. Be careful!\n\n" };
 
 		scenes[0][1].items = { {"red elixir", "allows to break free from a certain room", 40},
-							{"blue elixir" "allows to open a certain door", 40},
-							{"green elixir " "allows to open a certain door", 40} };
+							{"blue elixir", "allows to open a certain door", 40},
+							{"green elixir", "allows to open a certain door", 40} };
 
 		scenes[0][1].description = { "Welcome to the fairies’ room. Do you see these vials?\n"
 								"There are 3 elixirs to choose from. Remember, not all fairies are good. \n"
@@ -517,20 +531,20 @@ void loadData(player& player, scene scenes[WORLD_SIZE_Y][WORLD_SIZE_X]) {
 		scenes[1][3].description = { "Do you know what vampires like the most ? Give your blood or die.\n\n" };
 
 
-		scenes[3][0].items = { };
-		scenes[3][0].description = { };
+		scenes[2][0].items = { };
+		scenes[2][0].description = { };
 
-		scenes[3][1].items = { {"silver sword ", "you need to leave one item and you are going to lose your health points-30)",30},
+		scenes[2][1].items = { {"silver sword ", "you need to leave one item and you are going to lose your health points-30)",30},
 								{"violin", "you are going to lose your health points-40)) ", 30},
 								{"red elixir ", "you can use here a red elixir and go out without losing your health points", 20} };
 
-		scenes[3][1].description = { "Have you ever heard about dangerous monsters?\n"
+		scenes[2][1].description = { "Have you ever heard about dangerous monsters?\n"
 									"This time it's not just a story. Defend yourself!\n\n" };
 
-		scenes[3][2].items = { };
-		scenes[3][2].description = { };
+		scenes[2][2].items = { };
+		scenes[2][2].description = { };
 
-		scenes[3][3].items = { };
-		scenes[3][2].description = { "Wow, stranger, you are a good one. Congratulations! You are free!!\n\n" };
+		scenes[2][3].items = { };
+		scenes[2][3].description = { "Wow, stranger, you are a good one. Congratulations! You are free!!\n\n" };
 
 }
