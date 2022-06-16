@@ -75,6 +75,18 @@ int main() {
 
 	// Dane programu:
 	scene scenes[WORLD_SIZE_Y][WORLD_SIZE_X]; // tablica scen (pokoi) reprezentujaca swiat gry
+	scenes[0][0].possible_directions = "E";
+	scenes[0][1].possible_directions = "SEW";
+	scenes[0][2].possible_directions = "SEW";
+	scenes[0][3].possible_directions = "S";
+	scenes[1][0].possible_directions = "NSEW";
+	scenes[1][1].possible_directions = "NS";
+	scenes[1][2].possible_directions = "N";
+	scenes[1][3].possible_directions = "NS";
+	scenes[2][0].possible_directions = "NSEW";
+	scenes[2][1].possible_directions = "N";
+	scenes[2][2].possible_directions = "NSEW";
+	scenes[2][3].possible_directions = "N";
 	player player_1; // zmienna reprezentujaca gracza
 
 	loadData(player_1, scenes);
@@ -409,6 +421,7 @@ void display_items_in_the_inventory(player player) {
 }
 
 /*
+
  @return string with correct  direction or X when input is invalid
 */
 char isValidDirect(std::string input) {
@@ -427,22 +440,25 @@ void goSomwhere(std::string &direction) {
 	while (isValidDirect(direction) == 'X') {
 		std::cout << "You have chosen wrong direction. Try again" << std::endl;
 		std::cin >> direction;
-		isValidDirect(direction);
 	}
 	std::cout << "Good move." << std::endl;
 }
 void move(int& current_scene_x, int& current_scene_y, char direction) {
-	if (direction == 'N'/* && scene???.possible_directions.find("N")<4*/) {
+	if (direction == 'N' && (scenes[current_scene_y][current_scene_x].possible_directions.find('N') != std::string::npos)) {
 		current_scene_y--;
 	}
-	if (direction == 'S') {
+	else if (direction == 'S' && (scenes[current_scene_y][current_scene_x].possible_directions.find('S') != std::string::npos)) {
 		current_scene_y++;
 	}
-	if (direction == 'E') {
+	else if (direction == 'E' && (scenes[current_scene_y][current_scene_x].possible_directions.find('E') != std::string::npos)) {
 		current_scene_x++;
 	}
-	if (direction == 'W') {
+	else if (direction == 'W' && (scenes[current_scene_y][current_scene_x].possible_directions.find('W') != std::string::npos)) {
 		current_scene_x--;
+	}
+	else {
+		std::cout << "You can't go there!\n";
+		return;
 	}
 }
 
