@@ -15,11 +15,8 @@ int main() {
 
 	loadData(player_1, scenes);
 
-	player_1.currentSceneX = 0;
-	player_1.currentSceneY = 0;
-
 	int state = 0; // obecny stan (patrz: schemat stanów)
-	int usersChoice;
+	int usersChoice; // pomocnicza zmienna
 
 	do
 	{
@@ -29,12 +26,10 @@ int main() {
 		
 			system("cls");
 			std::cout << scenes[player_1.currentSceneY][player_1.currentSceneX].name << std::endl;
-			if (!scenes[player_1.currentSceneY][player_1.currentSceneX].problemSolved)
-			{
+			if (!scenes[player_1.currentSceneY][player_1.currentSceneX].problemSolved) {
 				std::cout << scenes[player_1.currentSceneY][player_1.currentSceneX].description;
 			}
-			else
-			{
+			else {
 				std::cout << SUCCESS_MESSAGE;
 			}
 
@@ -63,11 +58,15 @@ int main() {
 
 		case 3: // state PICK
 		
-			statePick(scenes[player_1.currentSceneY][player_1.currentSceneX], player_1, false);
+			if (player_1.currentSceneY == 0 && player_1.currentSceneX == 1) {
+				statePick(scenes[player_1.currentSceneY][player_1.currentSceneX], player_1, true);
+			}
+			else {
+				statePick(scenes[player_1.currentSceneY][player_1.currentSceneX], player_1, false);
+			}
 
 			state = 0;
 			break;
-		
 		
 		case 4: // state HELP
 

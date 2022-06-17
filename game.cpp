@@ -43,8 +43,8 @@ void statePick(scene& scene, player& player, bool oneOfN) {
 
 	// zapytaj gracza ktory chce podniesc
 	std::cout << "\nWhich one do you choose?" << std::endl;
+	
 	// odczytaj odpowiedz (walidacja)
-
 	while (usersChoice <= 0 || usersChoice > scene.items.size()) {
 		std::cin >> userInput;
 		try {
@@ -333,9 +333,7 @@ void actualSceneHelp(int& current_scene_x, int& current_scene_y, scene scenes[WO
 		std::cout << scenes[current_scene_y][current_scene_x].items[i].description << "   ";
 		std::cout << scenes[current_scene_y][current_scene_x].items[i].weight << "   ";
 		std::cout << "\n";
-
 	}
-
 
 }
 
@@ -390,7 +388,7 @@ void loadData(player& player, scene scenes[WORLD_SIZE_Y][WORLD_SIZE_X]) {
 
 	scenes[0][3].name = { "DRAGONS’ ROOM\n" };
 	scenes[0][3].items = { {"flute", "you need to leave one item", 3, 0, 20},
-							{"spear", "to use it you need to leave 2 items", 3, 0, 30} };
+							{"violin", "you are going to lose your health points -40", 3, 0, 30} };
 
 	scenes[0][3].description = { "Oh no! You just woke up the dragon! To calm him down you need to play him a lullaby.  \n"
 							"There is only one instrument whose sound does not irritate him!\n\n" };
@@ -453,5 +451,8 @@ void loadData(player& player, scene scenes[WORLD_SIZE_Y][WORLD_SIZE_X]) {
 	scenes[2][1].possibleDirections = "N";
 	scenes[2][2].possibleDirections = "NSEW";
 	scenes[2][3].possibleDirections = "N";
+
+	player.currentSceneX = 0;
+	player.currentSceneY = 0;
 }
 
